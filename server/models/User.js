@@ -28,7 +28,7 @@ const userSchema = new mongoose.Schema({
   },
   plan: {
     type: String,
-    enum: ['free', 'premium'],
+    enum: ['free', 'pro', 'researcher', 'enterprise'],
     default: 'free',
   },
   googleId: {
