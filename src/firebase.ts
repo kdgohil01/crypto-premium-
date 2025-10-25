@@ -26,6 +26,11 @@ export const auth = getAuth(app);
 // Initialize the Google Auth Provider
 export const googleProvider = new GoogleAuthProvider();
 
+// Configure Google Auth Provider for better UX
+googleProvider.setCustomParameters({
+  prompt: 'select_account'
+});
+
 // Initialize Analytics only if you need it
 // export const analytics = getAnalytics(app);
 

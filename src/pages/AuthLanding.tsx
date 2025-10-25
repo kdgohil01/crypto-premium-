@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useAuth } from "../contexts/AuthContext";
 import { Shield, Eye, Lock, Key, Database, Layers, Mail, User as UserIcon } from "lucide-react";
 import { isFirebaseConfigured } from "@/firebase";
+import FirebaseDebug from "@/components/FirebaseDebug";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -230,6 +231,19 @@ const AuthLanding = () => {
                 />
                 {isFirebaseConfigured ? "Continue with Google" : "Google auth unavailable"}
               </Button>
+              
+              {!isFirebaseConfigured && (
+                <p className="text-xs text-muted-foreground text-center mt-2">
+                  Firebase configuration missing. Please check environment variables.
+                </p>
+              )}
+              
+              {/* Debug info in development */}
+              {!import.meta.env.PROD && (
+                <div className="mt-4">
+                  <FirebaseDebug />
+                </div>
+              )}
             </CardContent>
           </Card>
         </div>

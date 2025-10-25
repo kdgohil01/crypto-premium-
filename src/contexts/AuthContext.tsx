@@ -94,15 +94,21 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     } catch (error: any) {
       console.error("Google Sign-in failed:", error);
       
-      // Handle specific errors
+      // Handle specific Firebase Auth errors
       if (error.code === 'auth/popup-closed-by-user') {
         toast.error('Sign-in cancelled');
       } else if (error.code === 'auth/popup-blocked') {
         toast.error('Popup blocked. Please allow popups for this site.');
+      } else if (error.code === 'auth/unauthorized-domain') {
+        toast.error('This domain is not authorized for Google Sign-in. Please contact support.');
+      } else if (error.code === 'auth/operation-not-allowed') {
+        toast.error('Google Sign-in is not enabled. Please contact support.');
+      } else if (error.code === 'auth/invalid-api-key') {
+        toast.error('Firebase configuration error. Please contact support.');
       } else if (error.message.includes('Cannot connect to server')) {
         toast.error('Cannot connect to server. Please check if backend is running.');
       } else if (error.code && error.code.startsWith('auth/')) {
-        toast.error('Google sign-in failed. Please try again.');
+        toast.error(`Google sign-in failed: ${error.message}`);
       } else {
         toast.error(error.message || 'Failed to sign in with Google');
       }
