@@ -16,19 +16,21 @@ connectDB();
 
 const app = express();
 
-// Middleware
-const allowedOrigins = [
-  'http://localhost:5173',
-  'http://localhost:8080', 
-  'http://192.168.0.105:8080',
-  'https://crypto-premium.vercel.app', // Your actual Vercel frontend URL
-  process.env.ALLOWED_ORIGIN
-].filter(Boolean);
+// Configure CORS to allow your Vercel frontend
+const corsOptions = {
+  origin: [
+    'http://localhost:5173',
+    'http://localhost:8080', 
+    'http://192.168.0.105:8080',
+    'https://crypto-premium.vercel.app', // Your actual Vercel frontend URL
+    process.env.ALLOWED_ORIGIN
+  ].filter(Boolean),
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'x-admin-key'],
+  credentials: true
+};
 
-app.use(cors({
-  origin: allowedOrigins,
-  credentials: true,
-}));
+app.use(cors(corsOptions));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
