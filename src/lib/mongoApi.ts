@@ -1,7 +1,8 @@
 // src/lib/mongoApi.ts
 // API helper for MongoDB backend
 
-const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:5050';
+const API_BASE = import.meta.env.VITE_API_BASE || 
+  (import.meta.env.PROD ? 'https://your-backend-app.vercel.app' : 'http://localhost:5050');
 
 // Get token from localStorage
 const getToken = (): string | null => {
