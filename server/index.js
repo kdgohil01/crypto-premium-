@@ -28,13 +28,29 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // MongoDB Connection
+let isConnected = false;
+
 const connectDB = async () => {
+  if (isConnected) {
+    console.log('Using existing MongoDB connection');
+    return;
+  }
+
   try {
-    const conn = await mongoose.connect(process.env.MONGODB_URI);
+    if (!process.env.MONGODB_URI) {
+      throw new Error('MONGODB_URI is not defined');
+    }
+    
+    const conn = await mongoose.connect(process.env.MONGODB_URI, {
+      serverSelectionTimeoutMS: 5000,
+    });
+    
+    isConnected = true;
     console.log(`MongoDB Connected: ${conn.connection.host}`);
   } catch (error) {
-    console.error(`Error: ${error.message}`);
-    process.exit(1);
+    console.error(`MongoDB Error: ${error.message}`);
+    isConnected = false;
+    throw error;
   }
 };
 
@@ -135,6 +151,8 @@ const Session = mongoose.model('Session', sessionSchema);
 
 // Generate Token
 const generateToken = async (userId) => {
+  await connectDB();
+  
   const token = jwt.sign({ id: userId }, process.env.JWT_SECRET, {
     expiresIn: process.env.JWT_EXPIRE || '30d',
   });
@@ -154,6 +172,8 @@ const generateToken = async (userId) => {
 // Auth Middleware
 const protect = async (req, res, next) => {
   try {
+    await connectDB();
+    
     let token;
 
     if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
@@ -219,9 +239,6 @@ const adminAuth = (req, res, next) => {
   next();
 };
 
-// Connect to MongoDB
-connectDB();
-
 // Routes
 // Root route
 app.get('/', (req, res) => {
@@ -254,6 +271,8 @@ app.get('/api/health', (req, res) => {
 // Register
 app.post('/api/auth/register', async (req, res) => {
   try {
+    await connectDB();
+    
     const { name, email, password } = req.body;
 
     if (!name || !email || !password) {
@@ -304,6 +323,8 @@ app.post('/api/auth/register', async (req, res) => {
 // Login
 app.post('/api/auth/login', async (req, res) => {
   try {
+    await connectDB();
+    
     const { email, password } = req.body;
 
     if (!email || !password) {
@@ -363,6 +384,8 @@ app.post('/api/auth/login', async (req, res) => {
 // Google Auth
 app.post('/api/auth/google', async (req, res) => {
   try {
+    await connectDB();
+    
     const { email, name, picture, googleId } = req.body;
 
     if (!email || !googleId) {
@@ -417,6 +440,8 @@ app.post('/api/auth/google', async (req, res) => {
 // Get Me
 app.get('/api/auth/me', protect, async (req, res) => {
   try {
+    await connectDB();
+    
     res.status(200).json({
       success: true,
       user: {
@@ -439,6 +464,8 @@ app.get('/api/auth/me', protect, async (req, res) => {
 // Logout
 app.post('/api/auth/logout', protect, async (req, res) => {
   try {
+    await connectDB();
+    
     const token = req.headers.authorization.split(' ')[1];
     await Session.deleteOne({ token });
 
@@ -458,6 +485,8 @@ app.post('/api/auth/logout', protect, async (req, res) => {
 // Get user status
 app.get('/api/user-status', protect, async (req, res) => {
   try {
+    await connectDB();
+    
     res.json({
       success: true,
       plan: req.user.plan,
@@ -474,6 +503,8 @@ app.get('/api/user-status', protect, async (req, res) => {
 // Upgrade user
 app.post('/api/upgrade', protect, async (req, res) => {
   try {
+    await connectDB();
+    
     const user = await User.findById(req.user._id);
     
     if (!user) {
@@ -504,6 +535,8 @@ app.post('/api/upgrade', protect, async (req, res) => {
 // Admin: Update user plan by email
 app.put('/api/admin/users/:email/plan', adminAuth, async (req, res) => {
   try {
+    await connectDB();
+    
     const { email } = req.params;
     const { plan } = req.body;
 
