@@ -223,6 +223,29 @@ const adminAuth = (req, res, next) => {
 connectDB();
 
 // Routes
+// Root route
+app.get('/', (req, res) => {
+  res.json({
+    success: true,
+    message: 'Crypto Premium Backend API',
+    version: '1.0.0',
+    endpoints: {
+      health: '/api/health',
+      auth: {
+        register: 'POST /api/auth/register',
+        login: 'POST /api/auth/login',
+        google: 'POST /api/auth/google',
+        logout: 'POST /api/auth/logout',
+        me: 'GET /api/auth/me'
+      },
+      user: {
+        status: 'GET /api/user-status',
+        upgrade: 'POST /api/upgrade'
+      }
+    }
+  });
+});
+
 // Health check
 app.get('/api/health', (req, res) => {
   res.json({ success: true, message: 'Server is running', timestamp: new Date().toISOString() });
