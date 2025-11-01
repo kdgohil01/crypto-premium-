@@ -268,6 +268,30 @@ app.get('/api/health', (req, res) => {
   res.json({ success: true, message: 'Server is running', timestamp: new Date().toISOString() });
 });
 
+// Database health check
+app.get('/api/db-health', async (req, res) => {
+  try {
+    await connectDB();
+    
+    // Try to ping the database
+    await mongoose.connection.db.admin().ping();
+    
+    res.json({
+      success: true,
+      message: 'Database connected successfully',
+      database: mongoose.connection.name,
+      host: mongoose.connection.host,
+      readyState: mongoose.connection.readyState // 1 = connected
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: 'Database connection failed',
+      error: error.message
+    });
+  }
+});
+
 // Register
 app.post('/api/auth/register', async (req, res) => {
   try {
