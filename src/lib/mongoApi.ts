@@ -1,8 +1,24 @@
 // src/lib/mongoApi.ts
 // API helper for MongoDB backend
 
-const API_BASE = import.meta.env.VITE_API_BASE || 
-  (import.meta.env.PROD ? 'https://crypto-premium-backend.vercel.app' : 'http://localhost:5050');
+// Get the correct API base URL
+const getApiBase = () => {
+  // First priority: Environment variable
+  if (import.meta.env.VITE_API_BASE) {
+    return import.meta.env.VITE_API_BASE;
+  }
+
+  // Second priority: Production fallback
+  if (import.meta.env.PROD) {
+    // You need to replace this with your actual backend URL
+    return 'https://crypto-premium-backend.vercel.app';
+  }
+
+  // Development fallback
+  return 'http://localhost:5050';
+};
+
+const API_BASE = getApiBase();
 
 // Get token from localStorage
 const getToken = (): string | null => {
@@ -49,9 +65,12 @@ async function apiRequest<T>(
     }
 
     console.log(`[API] ${method} ${API_BASE}${path}`, body || '');
+    console.log(`[API] Current API_BASE:`, API_BASE);
+    console.log(`[API] VITE_API_BASE env:`, import.meta.env.VITE_API_BASE);
+    console.log(`[API] Is production:`, import.meta.env.PROD);
 
     const response = await fetch(`${API_BASE}${path}`, config);
-    
+
     let data;
     try {
       data = await response.json();
